@@ -5,7 +5,6 @@ const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 const localURL = "http://127.0.0.1:5500/";
 
-let currentIndex = 0;
 const heading = $("header h2");
 const audio = $("audio");
 const cd = $(".cd");
@@ -15,13 +14,13 @@ const progress = $(".progress");
 const btnNext = $(".btn-next");
 const btnPrev = $(".btn-prev");
 
+
+
 const app = {
+  songs: {},
+  listSong: [],
+  currentIndex: 0,
   isPlaying: false,
-  handleFetchAPI: function (callback) {
-    fetch(baseURL + playlistURL)
-      .then((response) => response.json())
-      .then(callback);
-  },
   getSong: function (encodeId) {
     fetch(baseURL + songURL + encodeId)
       .then((response) => response.json())
@@ -29,17 +28,17 @@ const app = {
         audio.src = song.data[128];
       });
   },
-  handleRenderSong: function (songs) {
-    const songData = songs.data;
-    heading.innerText = songData.song.items[currentIndex].title;
+  handleRenderSong: function () {
+    this.listSong = this.songs.data.song.items;
+    heading.innerText = this.listSong[this.currentIndex].title;
     const thumbNail = `
     <div class="cd-thumb"
-      style="background-image: url(${songData.song.items[currentIndex].thumbnailM})">
+      style="background-image: url(${this.listSong[this.currentIndex].thumbnailM})">
     </div>`;
     cd.innerHTML = thumbNail;
-    this.getSong(songData.song.items[currentIndex].encodeId);
+    this.getSong(this.listSong[this.currentIndex].encodeId);
 
-    const listSongHtmls = songData.song.items.map((item) => {
+    const listSongHtmls = this.listSong.map((item) => {
       return `
       <div class="song">
       <div class="thumb" style="background-image: url(${item.thumbnailM})"></div>
@@ -67,13 +66,11 @@ const app = {
 
     btnPlay.onclick = () => {
       if (audio.src && audio.src !== localURL) {
-
         if (_this.isPlaying) {
           audio.pause();
         } else {
           audio.play();
         }
-        
       }
     };
     // Khi song được play
@@ -98,20 +95,58 @@ const app = {
     // Tua bài hát
     progress.onchange = (event) => {
       const newTime = (audio.duration / 100) * event.target.value;
-      console.log(newTime);
       audio.currentTime = newTime;
     }
-    _this.nextSong(_this);
-  },
-  nextSong: function (_this) {
     btnNext.onclick = () => {
-      currentIndex++;
+      _this.nextSong();
+      console.log(this.currentIndex);
+      console.log(this.listSong[this.currentIndex].encodeId, this.listSong[this.currentIndex].title);
+      setTimeout(() => {
+        console.log(audio.src);
+        audio.play();
+      }, 2000)
+    }
+    btnPrev.onclick = () => {
+      _this.prevSong();
+      console.log(this.currentIndex);
+      console.log(this.listSong[this.currentIndex].encodeId, this.listSong[this.currentIndex].title);
+      audio.play();
     }
   },
+  nextSong: function () {
+      this.currentIndex++;
+      if(this.currentIndex >= this.songs.data.song.items.length - 1) {
+        this.currentIndex = 0;
+      }
+      this.handleRenderSong();
+  },
+  prevSong: function () {
+      this.currentIndex--;
+      if(this.currentIndex < 0){
+        this.currentIndex = this.songs.data.song.items.length - 1;
+      }
+      this.handleRenderSong();
+  },
   start: function () {
-    this.handleFetchAPI((songs) => this.handleRenderSong(songs));
+    this.handleRenderSong();
     this.handleEvents();
   },
 };
 
-app.start();
+function handleFetchAPI(callback){
+  const url = baseURL + playlistURL;
+  fetch(url)
+  .then((response) => response.json())
+  .then(callback);
+
+}
+
+function firstStart(){
+  handleFetchAPI(getSongs);
+}
+
+function getSongs(data){
+  app.songs = data;
+  app.start();
+}
+firstStart();
