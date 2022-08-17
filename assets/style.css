@@ -186,3 +186,19 @@ header h2 {
   color: #999;
   font-size: 18px;
 }
+
+.btn-next:hover, 
+.btn-repeat:hover,
+.btn-random:hover,
+.btn-prev:hover {
+  opacity: 0.8;
+}
+
+.btn-next:active, 
+.btn-prev:active {
+  opacity: 0.8;
+}
+
+.song.active:active{
+  opacity: 0.8;
+}
