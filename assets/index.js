@@ -47,7 +47,7 @@ const app = {
     this.getSong(this.listSong[this.currentIndex].encodeId);
     const listSongHtmls = this.listSong.map((item, index) => {
       return `
-      <div class="song ${index === this.currentIndex ? "active" : ""}">
+      <div class="song ${index === this.currentIndex ? "active" : ""}" data-index=${index}>
       <div class="thumb" style="background-image: url(${
         item.thumbnailM
       })"></div>
@@ -166,6 +166,22 @@ const app = {
       } else {
         _this.cdAnimate.pause();
         btnNext.click();
+      }
+    };
+
+    playList.onclick = (event) => {
+      const songNode = event.target.closest(".song:not(.active)");
+      if (songNode || event.target.closest(".option")) {
+        if(songNode){
+          _this.currentIndex = Number(songNode.dataset.index)
+          _this.autoPlaySong;
+          setTimeout(() => {
+            this.handleRenderSong();
+          }, 2200);
+          setTimeout(() => {
+            audio.play();
+          }, 5500);
+        }
       }
     };
   },

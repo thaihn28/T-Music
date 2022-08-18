@@ -199,6 +199,7 @@ header h2 {
   opacity: 0.8;
 }
 
-.song.active:active{
-  opacity: 0.8;
+.song:active{
+  background: #ec1f55;
+  opacity: 0.7;
 }
